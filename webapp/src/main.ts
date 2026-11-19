@@ -18,6 +18,7 @@ registerPlugin(
           path: 'public-ip-inventory',
           name: 'PublicIpInventory',
           redirect: '/public-ip-inventory/dashboard',
+          translatedName: () => 'Public IP Inventory',
           meta: {
             title: 'Public IP Inventory',
             translatedName: () => 'Public IP Inventory',
@@ -28,6 +29,7 @@ registerPlugin(
               path: 'dashboard',
               name: 'PublicIpInventoryDashboard',
               component: DashboardView,
+              translatedName: () => 'Dashboard',
               meta: {
                 title: 'Dashboard',
                 translatedName: () => 'Dashboard',
@@ -38,6 +40,7 @@ registerPlugin(
               path: 'list',
               name: 'PublicIpInventoryList',
               component: IpListView,
+              translatedName: () => 'IP Address List',
               meta: {
                 title: 'IP Address List',
                 translatedName: () => 'IP Address List',
@@ -48,6 +51,7 @@ registerPlugin(
               path: 'add',
               name: 'PublicIpInventoryAdd',
               component: AddIpView,
+              translatedName: () => 'Add IP Address',
               meta: {
                 title: 'Add IP Address',
                 translatedName: () => 'Add IP Address',
@@ -58,6 +62,7 @@ registerPlugin(
               path: 'reports',
               name: 'PublicIpInventoryReports',
               component: ReportsView,
+              translatedName: () => 'Reports',
               meta: {
                 title: 'Reports',
                 translatedName: () => 'Reports',

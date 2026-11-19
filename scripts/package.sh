@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${ROOT_DIR}/dist"
 PLUGIN_ID="com.company.public-ip-inventory"
-VERSION="1.0.0"
+VERSION="1.0.1"
 PACKAGE_NAME="${PLUGIN_ID}-${VERSION}.tar.gz"
 
 echo "Building frontend bundle..."
