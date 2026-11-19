@@ -30,18 +30,19 @@
   "permissions": [],
   "network_hosts": [],
   "settings_schema": {
-    "type": "object",
-    "properties": {
-      "db_path": {
-        "type": "string",
-        "title": "SQLite Database Path",
-        "description": "Custom path for public-ip-inventory.db (defaults to /var/lib/nginx-ui/plugins/public-ip-inventory/public-ip-inventory.db or plugin data dir)"
+    "settings": [
+      {
+        "key": "db_path",
+        "type": "text",
+        "display_name": "SQLite Database Path",
+        "help_text": "Custom path for public-ip-inventory.db (leave empty to use plugin data directory)"
       },
-      "backup_dir": {
-        "type": "string",
-        "title": "Backup Directory",
-        "description": "Directory for SQLite backups (defaults to <db_dir>/backups)"
+      {
+        "key": "backup_dir",
+        "type": "text",
+        "display_name": "Backup Directory",
+        "help_text": "Directory for SQLite backups (defaults to <db_dir>/backups)"
       }
-    }
+    ]
   }
 }
