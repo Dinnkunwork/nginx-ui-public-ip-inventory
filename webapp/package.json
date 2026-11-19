@@ -9,7 +9,7 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@nginxui/plugin-sdk": "^1.0.0",
+    "@nginxui/plugin-sdk": "^0.1.1",
     "antdv-next": "^1.5.0",
     "vue": "^3.5.0",
     "vue-router": "^4.5.0"
