@@ -15,58 +15,53 @@ registerPlugin(
 
       registry.registerRoute(
         {
-          path: '/public-ip-inventory/dashboard',
-          name: 'PublicIpInventoryDashboard',
-          component: DashboardView,
+          path: 'public-ip-inventory',
+          name: 'PublicIpInventory',
+          redirect: '/public-ip-inventory/dashboard',
           meta: {
-            title: 'Dashboard',
-            group: 'Public IP Inventory',
-            icon: 'i-ant-design:dashboard-outlined',
+            title: 'Public IP Inventory',
+            icon: 'i-ant-design:global-outlined',
           },
+          children: [
+            {
+              path: 'dashboard',
+              name: 'PublicIpInventoryDashboard',
+              component: DashboardView,
+              meta: {
+                title: 'Dashboard',
+                icon: 'i-ant-design:dashboard-outlined',
+              },
+            },
+            {
+              path: 'list',
+              name: 'PublicIpInventoryList',
+              component: IpListView,
+              meta: {
+                title: 'IP Address List',
+                icon: 'i-ant-design:unordered-list-outlined',
+              },
+            },
+            {
+              path: 'add',
+              name: 'PublicIpInventoryAdd',
+              component: AddIpView,
+              meta: {
+                title: 'Add IP Address',
+                icon: 'i-ant-design:plus-circle-outlined',
+              },
+            },
+            {
+              path: 'reports',
+              name: 'PublicIpInventoryReports',
+              component: ReportsView,
+              meta: {
+                title: 'Reports',
+                icon: 'i-ant-design:file-excel-outlined',
+              },
+            },
+          ],
         },
-        { order: 10 },
-      )
-
-      registry.registerRoute(
-        {
-          path: '/public-ip-inventory/list',
-          name: 'PublicIpInventoryList',
-          component: IpListView,
-          meta: {
-            title: 'IP Address List',
-            group: 'Public IP Inventory',
-            icon: 'i-ant-design:unordered-list-outlined',
-          },
-        },
-        { parent: 'PublicIpInventoryDashboard', order: 20 },
-      )
-
-      registry.registerRoute(
-        {
-          path: '/public-ip-inventory/add',
-          name: 'PublicIpInventoryAdd',
-          component: AddIpView,
-          meta: {
-            title: 'Add IP Address',
-            group: 'Public IP Inventory',
-            icon: 'i-ant-design:plus-circle-outlined',
-          },
-        },
-        { parent: 'PublicIpInventoryDashboard', order: 30 },
-      )
-
-      registry.registerRoute(
-        {
-          path: '/public-ip-inventory/reports',
-          name: 'PublicIpInventoryReports',
-          component: ReportsView,
-          meta: {
-            title: 'Reports',
-            group: 'Public IP Inventory',
-            icon: 'i-ant-design:file-excel-outlined',
-          },
-        },
-        { parent: 'PublicIpInventoryDashboard', order: 40 },
+        { order: 50 },
       )
     },
     teardown() {
