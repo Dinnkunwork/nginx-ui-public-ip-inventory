@@ -31,5 +31,10 @@ if [[ -d "${ROOT_DIR}/webapp/dist" ]]; then
   cp -r "${ROOT_DIR}/webapp/dist" "${STAGE_DIR}/webapp/dist"
 fi
 
-tar -czf "${DIST_DIR}/${PACKAGE_NAME}" -C "${STAGE_DIR}" .
+TAR_ITEMS=("plugin.json" "bin" "server")
+if [[ -d "${STAGE_DIR}/webapp/dist" ]]; then
+  TAR_ITEMS+=("webapp")
+fi
+
+tar -czf "${DIST_DIR}/${PACKAGE_NAME}" -C "${STAGE_DIR}" "${TAR_ITEMS[@]}"
 echo "Created plugin package: ${DIST_DIR}/${PACKAGE_NAME}"
