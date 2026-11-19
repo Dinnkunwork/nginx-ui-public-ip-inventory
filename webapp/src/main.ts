@@ -20,6 +20,7 @@ registerPlugin(
           redirect: '/public-ip-inventory/dashboard',
           meta: {
             title: 'Public IP Inventory',
+            translatedName: () => 'Public IP Inventory',
             icon: 'i-ant-design:global-outlined',
           },
           children: [
@@ -29,6 +30,7 @@ registerPlugin(
               component: DashboardView,
               meta: {
                 title: 'Dashboard',
+                translatedName: () => 'Dashboard',
                 icon: 'i-ant-design:dashboard-outlined',
               },
             },
@@ -38,6 +40,7 @@ registerPlugin(
               component: IpListView,
               meta: {
                 title: 'IP Address List',
+                translatedName: () => 'IP Address List',
                 icon: 'i-ant-design:unordered-list-outlined',
               },
             },
@@ -47,6 +50,7 @@ registerPlugin(
               component: AddIpView,
               meta: {
                 title: 'Add IP Address',
+                translatedName: () => 'Add IP Address',
                 icon: 'i-ant-design:plus-circle-outlined',
               },
             },
@@ -56,6 +60,7 @@ registerPlugin(
               component: ReportsView,
               meta: {
                 title: 'Reports',
+                translatedName: () => 'Reports',
                 icon: 'i-ant-design:file-excel-outlined',
               },
             },

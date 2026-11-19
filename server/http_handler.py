@@ -57,12 +57,15 @@ class InventoryRouter:
         user = (
             lowered.get("x-nginx-ui-user")
             or lowered.get("x-nginx-ui-username")
+            or lowered.get("x-nginx-ui-user-name")
+            or lowered.get("x-nginxui-user")
+            or lowered.get("x-forwarded-user")
             or ""
         ).strip()
         if user:
             return user
         if not self.config.require_auth_header:
-            return "local-dev"
+            return "nginx-ui"
         return None
 
     def dispatch(

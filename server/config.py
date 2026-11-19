@@ -51,7 +51,7 @@ class Config:
         backup_dir = Path(backup_override) if backup_override else db_path.parent / "backups"
 
         socket_path = data_dir / SOCKET_FILENAME
-        require_auth = os.environ.get("IP_INVENTORY_REQUIRE_AUTH", "1").strip() != "0"
+        require_auth = os.environ.get("IP_INVENTORY_REQUIRE_AUTH", "0").strip() == "1"
 
         return cls(
             data_dir=data_dir,
