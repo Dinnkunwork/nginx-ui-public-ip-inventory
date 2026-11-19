@@ -23,7 +23,7 @@
     "bundle_path": "webapp/dist/main.js",
     "shared": {
       "vue": ">=3.5.0 <4",
-      "vue-router": ">=4.5.0 <5",
+      "vue-router": ">=4.5.0 <6",
       "antdv-next": ">=1.5.0 <2"
     }
   },
