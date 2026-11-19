@@ -14,7 +14,10 @@
     "listen": "unix"
   },
   "server": {
-    "binary": "bin/public-ip-inventory-server"
+    "command": [
+      "python3",
+      "bin/public-ip-inventory-server"
+    ]
   },
   "webapp": {
     "bundle_path": "webapp/dist/main.js",
