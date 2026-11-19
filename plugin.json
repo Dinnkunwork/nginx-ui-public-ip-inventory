@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nginxui/plugin-spec/main/schema/plugin.schema.json",
+  "id": "com.company.public-ip-inventory",
+  "name": "Public IP Inventory",
+  "version": "1.0.0",
+  "api_version": 1,
+  "description": "Centralized manual inventory of company and client Public IP addresses (IPv4/IPv6) with dashboard, search/filter, CSV reporting, and SQLite backup.",
+  "author": "Infrastructure Team",
+  "license": "MIT",
+  "capabilities": [
+    "http"
+  ],
+  "http": {
+    "listen": "unix"
+  },
+  "server": {
+    "binary": "bin/public-ip-inventory-server"
+  },
+  "webapp": {
+    "bundle_path": "webapp/dist/main.js",
+    "style_path": "webapp/dist/style.css",
+    "shared": {
+      "vue": ">=3.5.0 <4",
+      "antdv-next": ">=1.0.0"
+    }
+  },
+  "permissions": [],
+  "network_hosts": [],
+  "settings_schema": {
+    "type": "object",
+    "properties": {
+      "db_path": {
+        "type": "string",
+        "title": "SQLite Database Path",
+        "description": "Custom path for public-ip-inventory.db (defaults to /var/lib/nginx-ui/plugins/public-ip-inventory/public-ip-inventory.db or plugin data dir)"
+      },
+      "backup_dir": {
+        "type": "string",
+        "title": "Backup Directory",
+        "description": "Directory for SQLite backups (defaults to <db_dir>/backups)"
+      }
+    }
+  }
+}
