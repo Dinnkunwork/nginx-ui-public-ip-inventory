@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/nginxui/plugin-spec/main/schema/plugin.schema.json",
   "id": "com.company.public-ip-inventory",
   "name": "Public IP Inventory",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "api_version": 1,
   "description": "Centralized manual inventory of company and client Public IP addresses (IPv4/IPv6) with dashboard, search/filter, CSV reporting, and SQLite backup.",
   "author": "Infrastructure Team",

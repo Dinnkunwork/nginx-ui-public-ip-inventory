@@ -1,4 +1,15 @@
 <script setup lang="ts">
+import {
+  Alert,
+  Button,
+  Col,
+  Form,
+  FormItem,
+  Input,
+  Row,
+  Select,
+  TextArea,
+} from 'antdv-next'
 import { computed, reactive, ref, watch } from 'vue'
 import type { PublicIpPayload, PublicIpRecord } from '../types/inventory'
 import { isValidIpAddress } from '../utils/ipValidation'
@@ -22,6 +33,25 @@ const emit = defineEmits<{
   (e: 'submit', payload: PublicIpPayload): void
   (e: 'cancel'): void
 }>()
+
+const OWNER_OPTIONS = [
+  { label: 'Internal', value: 'Internal' },
+  { label: 'External', value: 'External' },
+]
+
+const STATUS_OPTIONS = [
+  { label: 'Used', value: 'Used' },
+  { label: 'Available', value: 'Available' },
+  { label: 'Reserved', value: 'Reserved' },
+]
+
+const ENVIRONMENT_OPTIONS = [
+  { label: '-', value: '' },
+  { label: 'dev', value: 'dev' },
+  { label: 'staging', value: 'staging' },
+  { label: 'uat', value: 'uat' },
+  { label: 'prod', value: 'prod' },
+]
 
 const form = reactive<PublicIpPayload>({
   ip_address: '',
@@ -97,6 +127,7 @@ function handleSubmit(): void {
     provider: form.provider.trim(),
     application: form.application.trim(),
     domain: form.domain.trim(),
+    environment: form.environment || '',
     server_ip: form.server_ip.trim(),
     notes: form.notes.trim(),
   })
@@ -104,96 +135,89 @@ function handleSubmit(): void {
 </script>
 
 <template>
-  <a-form layout="vertical" @submit.prevent="handleSubmit">
-    <a-alert
+  <Form layout="vertical" @submit.prevent="handleSubmit">
+    <Alert
       v-if="validationError || serverError"
       type="error"
-      :message="validationError || serverError"
+      :title="validationError || serverError"
       show-icon
       style="margin-bottom: 16px"
     />
 
-    <a-row :gutter="16">
-      <a-col :xs="24" :md="12">
-        <a-form-item label="Public IP Address" required>
-          <a-input
+    <Row :gutter="16">
+      <Col :xs="24" :md="12">
+        <FormItem label="Public IP Address" required>
+          <Input
             v-model:value="form.ip_address"
             placeholder="e.g. 103.10.20.10 or 2001:db8::1"
           />
-        </a-form-item>
-      </a-col>
-      <a-col :xs="24" :md="12">
-        <a-form-item label="Provider (ISP / Cloud)" required>
-          <a-input v-model:value="form.provider" placeholder="e.g. Biznet, Telkom, AWS" />
-        </a-form-item>
-      </a-col>
-    </a-row>
+        </FormItem>
+      </Col>
+      <Col :xs="24" :md="12">
+        <FormItem label="Provider (ISP / Cloud)" required>
+          <Input v-model:value="form.provider" placeholder="e.g. Biznet, Telkom, AWS" />
+        </FormItem>
+      </Col>
+    </Row>
 
-    <a-row :gutter="16">
-      <a-col :xs="24" :md="8">
-        <a-form-item label="Owner" required>
-          <a-select v-model:value="form.owner_type">
-            <a-select-option value="Internal">Internal</a-select-option>
-            <a-select-option value="External">External</a-select-option>
-          </a-select>
-        </a-form-item>
-      </a-col>
-      <a-col :xs="24" :md="8">
-        <a-form-item label="Status" required>
-          <a-select v-model:value="form.status">
-            <a-select-option value="Used">Used</a-select-option>
-            <a-select-option value="Available">Available</a-select-option>
-            <a-select-option value="Reserved">Reserved</a-select-option>
-          </a-select>
-        </a-form-item>
-      </a-col>
-      <a-col :xs="24" :md="8">
-        <a-form-item label="Environment" :required="isUsed">
-          <a-select v-model:value="form.environment" allow-clear placeholder="Select environment">
-            <a-select-option value="">-</a-select-option>
-            <a-select-option value="dev">dev</a-select-option>
-            <a-select-option value="staging">staging</a-select-option>
-            <a-select-option value="uat">uat</a-select-option>
-            <a-select-option value="prod">prod</a-select-option>
-          </a-select>
-        </a-form-item>
-      </a-col>
-    </a-row>
+    <Row :gutter="16">
+      <Col :xs="24" :md="8">
+        <FormItem label="Owner" required>
+          <Select v-model:value="form.owner_type" :options="OWNER_OPTIONS" style="width: 100%" />
+        </FormItem>
+      </Col>
+      <Col :xs="24" :md="8">
+        <FormItem label="Status" required>
+          <Select v-model:value="form.status" :options="STATUS_OPTIONS" style="width: 100%" />
+        </FormItem>
+      </Col>
+      <Col :xs="24" :md="8">
+        <FormItem label="Environment" :required="isUsed">
+          <Select
+            v-model:value="form.environment"
+            :options="ENVIRONMENT_OPTIONS"
+            allow-clear
+            placeholder="Select environment"
+            style="width: 100%"
+          />
+        </FormItem>
+      </Col>
+    </Row>
 
-    <a-row :gutter="16">
-      <a-col :xs="24" :md="12">
-        <a-form-item label="Application / Client" :required="isUsed">
-          <a-input
+    <Row :gutter="16">
+      <Col :xs="24" :md="12">
+        <FormItem label="Application / Client" :required="isUsed">
+          <Input
             v-model:value="form.application"
             placeholder="Optional when Available"
           />
-        </a-form-item>
-      </a-col>
-      <a-col :xs="24" :md="12">
-        <a-form-item label="Domain">
-          <a-input v-model:value="form.domain" placeholder="e.g. app.company.id" />
-        </a-form-item>
-      </a-col>
-    </a-row>
+        </FormItem>
+      </Col>
+      <Col :xs="24" :md="12">
+        <FormItem label="Domain">
+          <Input v-model:value="form.domain" placeholder="e.g. app.company.id" />
+        </FormItem>
+      </Col>
+    </Row>
 
-    <a-row :gutter="16">
-      <a-col :xs="24" :md="12">
-        <a-form-item label="Server / Private IP">
-          <a-input v-model:value="form.server_ip" placeholder="e.g. 10.10.1.15" />
-        </a-form-item>
-      </a-col>
-      <a-col :xs="24" :md="12">
-        <a-form-item label="Notes">
-          <a-textarea v-model:value="form.notes" :rows="2" placeholder="Additional remarks" />
-        </a-form-item>
-      </a-col>
-    </a-row>
+    <Row :gutter="16">
+      <Col :xs="24" :md="12">
+        <FormItem label="Server / Private IP">
+          <Input v-model:value="form.server_ip" placeholder="e.g. 10.10.1.15" />
+        </FormItem>
+      </Col>
+      <Col :xs="24" :md="12">
+        <FormItem label="Notes">
+          <TextArea v-model:value="form.notes" :rows="2" placeholder="Additional remarks" />
+        </FormItem>
+      </Col>
+    </Row>
 
     <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px">
-      <a-button @click="emit('cancel')">Cancel</a-button>
-      <a-button type="primary" html-type="submit" :loading="submitting">
+      <Button @click="emit('cancel')">Cancel</Button>
+      <Button type="primary" html-type="submit" :loading="submitting">
         {{ submitLabel }}
-      </a-button>
+      </Button>
     </div>
-  </a-form>
+  </Form>
 </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Modal } from 'antdv-next'
 import IpForm from './IpForm.vue'
 import type { PublicIpPayload, PublicIpRecord } from '../types/inventory'
 
@@ -16,12 +17,12 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <a-modal
+  <Modal
     :open="open"
     :title="initial ? `Edit Public IP: ${initial.ip_address}` : 'Add Public IP'"
     :footer="null"
     width="720px"
-    destroy-on-close
+    destroy-on-hidden
     @cancel="emit('update:open', false)"
   >
     <IpForm
@@ -32,5 +33,5 @@ const emit = defineEmits<{
       @submit="(payload) => emit('submit', payload)"
       @cancel="emit('update:open', false)"
     />
-  </a-modal>
+  </Modal>
 </template>

@@ -1,5 +1,18 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  InputSearch,
+  Popconfirm,
+  Row,
+  Select,
+  Space,
+  Table,
+  Tag,
+} from 'antdv-next'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { inventoryApi } from '../api/client'
 import IpDetailDrawer from '../components/IpDetailDrawer.vue'
 import IpFormModal from '../components/IpFormModal.vue'
@@ -14,13 +27,41 @@ const providers = ref<string[]>([])
 
 const filters = reactive({
   q: '',
-  provider: '',
-  owner_type: '',
-  environment: '',
-  status: '',
+  provider: undefined as string | undefined,
+  owner_type: undefined as string | undefined,
+  environment: undefined as string | undefined,
+  status: undefined as string | undefined,
   page: 1,
   page_size: 20,
 })
+
+const providerOptions = computed(() => providers.value.map((p) => ({ label: p, value: p })))
+const ownerOptions = [
+  { label: 'Internal', value: 'Internal' },
+  { label: 'External', value: 'External' },
+]
+const envOptions = [
+  { label: 'dev', value: 'dev' },
+  { label: 'staging', value: 'staging' },
+  { label: 'uat', value: 'uat' },
+  { label: 'prod', value: 'prod' },
+]
+const statusOptions = [
+  { label: 'Used', value: 'Used' },
+  { label: 'Available', value: 'Available' },
+  { label: 'Reserved', value: 'Reserved' },
+]
+
+const columns = [
+  { title: 'Public IP', dataIndex: 'ip_address', key: 'ip_address' },
+  { title: 'Provider', dataIndex: 'provider', key: 'provider' },
+  { title: 'Owner', dataIndex: 'owner_type', key: 'owner_type' },
+  { title: 'Application', dataIndex: 'application', key: 'application' },
+  { title: 'Domain', dataIndex: 'domain', key: 'domain' },
+  { title: 'Environment', dataIndex: 'environment', key: 'environment' },
+  { title: 'Status', dataIndex: 'status', key: 'status' },
+  { title: 'Actions', key: 'actions', width: 220 },
+]
 
 const modalOpen = ref(false)
 const editingRecord = ref<PublicIpRecord | null>(null)
@@ -35,7 +76,15 @@ async function loadIps(): Promise<void> {
   loading.value = true
   error.value = ''
   try {
-    const res = await inventoryApi.listIps(filters)
+    const res = await inventoryApi.listIps({
+      q: filters.q,
+      provider: filters.provider || '',
+      owner_type: filters.owner_type || '',
+      environment: filters.environment || '',
+      status: filters.status || '',
+      page: filters.page,
+      page_size: filters.page_size,
+    })
     items.value = res.items
     total.value = res.total
     providers.value = res.providers
@@ -99,10 +148,10 @@ async function handleDelete(record: PublicIpRecord): Promise<void> {
 
 function resetFilters(): void {
   filters.q = ''
-  filters.provider = ''
-  filters.owner_type = ''
-  filters.environment = ''
-  filters.status = ''
+  filters.provider = undefined
+  filters.owner_type = undefined
+  filters.environment = undefined
+  filters.status = undefined
   filters.page = 1
   loadIps()
 }
@@ -111,84 +160,75 @@ onMounted(loadIps)
 </script>
 
 <template>
-  <div style="padding: 16px">
+  <div style="padding: 8px">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
       <h2 style="margin: 0">IP Address List</h2>
-      <a-button type="primary" @click="openCreate">Add Public IP</a-button>
+      <Button type="primary" @click="openCreate">Add Public IP</Button>
     </div>
 
-    <a-card style="margin-bottom: 16px">
-      <a-row :gutter="[12, 12]">
-        <a-col :xs="24" :md="6">
-          <a-input-search
+    <Card style="margin-bottom: 16px">
+      <Row :gutter="[12, 12]">
+        <Col :xs="24" :md="6">
+          <InputSearch
             v-model:value="filters.q"
             placeholder="Search IP, app, domain, server..."
             allow-clear
             @search="() => { filters.page = 1; loadIps() }"
           />
-        </a-col>
-        <a-col :xs="12" :md="4">
-          <a-select
+        </Col>
+        <Col :xs="12" :md="4">
+          <Select
             v-model:value="filters.provider"
+            :options="providerOptions"
             allow-clear
             placeholder="Provider"
             style="width: 100%"
             @change="() => { filters.page = 1; loadIps() }"
-          >
-            <a-select-option v-for="p in providers" :key="p" :value="p">{{ p }}</a-select-option>
-          </a-select>
-        </a-col>
-        <a-col :xs="12" :md="4">
-          <a-select
+          />
+        </Col>
+        <Col :xs="12" :md="4">
+          <Select
             v-model:value="filters.owner_type"
+            :options="ownerOptions"
             allow-clear
             placeholder="Owner"
             style="width: 100%"
             @change="() => { filters.page = 1; loadIps() }"
-          >
-            <a-select-option value="Internal">Internal</a-select-option>
-            <a-select-option value="External">External</a-select-option>
-          </a-select>
-        </a-col>
-        <a-col :xs="12" :md="4">
-          <a-select
+          />
+        </Col>
+        <Col :xs="12" :md="4">
+          <Select
             v-model:value="filters.environment"
+            :options="envOptions"
             allow-clear
             placeholder="Environment"
             style="width: 100%"
             @change="() => { filters.page = 1; loadIps() }"
-          >
-            <a-select-option value="dev">dev</a-select-option>
-            <a-select-option value="staging">staging</a-select-option>
-            <a-select-option value="uat">uat</a-select-option>
-            <a-select-option value="prod">prod</a-select-option>
-          </a-select>
-        </a-col>
-        <a-col :xs="12" :md="4">
-          <a-select
+          />
+        </Col>
+        <Col :xs="12" :md="4">
+          <Select
             v-model:value="filters.status"
+            :options="statusOptions"
             allow-clear
             placeholder="Status"
             style="width: 100%"
             @change="() => { filters.page = 1; loadIps() }"
-          >
-            <a-select-option value="Used">Used</a-select-option>
-            <a-select-option value="Available">Available</a-select-option>
-            <a-select-option value="Reserved">Reserved</a-select-option>
-          </a-select>
-        </a-col>
-        <a-col :xs="24" :md="2">
-          <a-button block @click="resetFilters">Reset</a-button>
-        </a-col>
-      </a-row>
-    </a-card>
+          />
+        </Col>
+        <Col :xs="24" :md="2">
+          <Button block @click="resetFilters">Reset</Button>
+        </Col>
+      </Row>
+    </Card>
 
-    <a-alert v-if="error" type="error" :message="error" show-icon style="margin-bottom: 16px" />
+    <Alert v-if="error" type="error" :title="error" show-icon style="margin-bottom: 16px" />
 
-    <a-table
+    <Table
       :loading="loading"
       :data-source="items"
       row-key="id"
+      :columns="columns"
       :pagination="{
         current: filters.page,
         pageSize: filters.page_size,
@@ -200,16 +240,6 @@ onMounted(loadIps)
           loadIps()
         },
       }"
-      :columns="[
-        { title: 'Public IP', dataIndex: 'ip_address', key: 'ip_address' },
-        { title: 'Provider', dataIndex: 'provider', key: 'provider' },
-        { title: 'Owner', dataIndex: 'owner_type', key: 'owner_type' },
-        { title: 'Application', dataIndex: 'application', key: 'application' },
-        { title: 'Domain', dataIndex: 'domain', key: 'domain' },
-        { title: 'Environment', dataIndex: 'environment', key: 'environment' },
-        { title: 'Status', dataIndex: 'status', key: 'status' },
-        { title: 'Actions', key: 'actions', width: 220 },
-      ]"
     >
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'application'">
@@ -222,25 +252,25 @@ onMounted(loadIps)
           {{ record.environment || '-' }}
         </template>
         <template v-else-if="column.key === 'status'">
-          <a-tag :color="statusTagColor(record.status)">{{ record.status }}</a-tag>
+          <Tag :color="statusTagColor(record.status)">{{ record.status }}</Tag>
         </template>
         <template v-else-if="column.key === 'actions'">
-          <a-space>
-            <a-button size="small" @click="openDetails(record)">View</a-button>
-            <a-button size="small" @click="openEdit(record)">Edit</a-button>
-            <a-popconfirm
+          <Space>
+            <Button size="small" @click="openDetails(record as PublicIpRecord)">View</Button>
+            <Button size="small" @click="openEdit(record as PublicIpRecord)">Edit</Button>
+            <Popconfirm
               :title="`Delete Public IP ${record.ip_address}?`"
               ok-text="Delete"
               cancel-text="Cancel"
               ok-type="danger"
-              @confirm="handleDelete(record)"
+              @confirm="handleDelete(record as PublicIpRecord)"
             >
-              <a-button size="small" danger>Delete</a-button>
-            </a-popconfirm>
-          </a-space>
+              <Button size="small" danger>Delete</Button>
+            </Popconfirm>
+          </Space>
         </template>
       </template>
-    </a-table>
+    </Table>
 
     <IpFormModal
       v-model:open="modalOpen"

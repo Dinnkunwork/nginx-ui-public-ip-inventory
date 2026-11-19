@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Card } from 'antdv-next'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { inventoryApi } from '../api/client'
@@ -24,9 +25,9 @@ async function handleCreate(payload: PublicIpPayload): Promise<void> {
 </script>
 
 <template>
-  <div style="padding: 16px; max-width: 840px">
+  <div style="padding: 8px; max-width: 840px">
     <h2 style="margin-bottom: 16px">Add Public IP Address</h2>
-    <a-card>
+    <Card>
       <IpForm
         :submitting="submitting"
         :server-error="serverError"
@@ -34,6 +35,6 @@ async function handleCreate(payload: PublicIpPayload): Promise<void> {
         @submit="handleCreate"
         @cancel="router.push('/public-ip-inventory/list')"
       />
-    </a-card>
+    </Card>
   </div>
 </template>
