@@ -9,7 +9,7 @@ from typing import Any
 
 PLUGIN_ID = "com.company.public-ip-inventory"
 PLUGIN_NAME = "Public IP Inventory"
-PLUGIN_VERSION = "1.0.0"
+PLUGIN_VERSION = "1.1.0"
 API_VERSION = 1
 
 DEFAULT_DATA_DIR = "/var/lib/nginx-ui/plugins/public-ip-inventory"

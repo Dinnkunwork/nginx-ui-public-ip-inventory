@@ -1,9 +1,7 @@
 import { defineNginxUIPlugin, registerPlugin, useShared } from '@nginxui/plugin-sdk'
 import { PLUGIN_ID, setPluginHttpClient, type HttpClientLike } from './api/client'
-import AddIpView from './views/AddIpView.vue'
 import DashboardView from './views/DashboardView.vue'
 import IpListView from './views/IpListView.vue'
-import ReportsView from './views/ReportsView.vue'
 
 registerPlugin(
   PLUGIN_ID,
@@ -35,7 +33,7 @@ registerPlugin(
           name: 'PublicIpInventoryDashboard',
           component: DashboardView,
           meta: {
-            name: () => 'Dashboard',
+            name: () => 'Dashboard & Reports',
             lastRouteName: 'PublicIpInventory',
           },
         },
@@ -53,32 +51,6 @@ registerPlugin(
           },
         },
         { parent: 'PublicIpInventory', order: 20 },
-      )
-
-      registry.registerRoute(
-        {
-          path: 'public-ip-inventory/add',
-          name: 'PublicIpInventoryAdd',
-          component: AddIpView,
-          meta: {
-            name: () => 'Add IP Address',
-            lastRouteName: 'PublicIpInventory',
-          },
-        },
-        { parent: 'PublicIpInventory', order: 30 },
-      )
-
-      registry.registerRoute(
-        {
-          path: 'public-ip-inventory/reports',
-          name: 'PublicIpInventoryReports',
-          component: ReportsView,
-          meta: {
-            name: () => 'Reports',
-            lastRouteName: 'PublicIpInventory',
-          },
-        },
-        { parent: 'PublicIpInventory', order: 40 },
       )
     },
     teardown() {

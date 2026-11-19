@@ -11,12 +11,12 @@ import {
   TextArea,
 } from 'antdv-next'
 import { computed, reactive, ref, watch } from 'vue'
-import type { PublicIpPayload, PublicIpRecord } from '../types/inventory'
+import type { PublicIpPayload } from '../types/inventory'
 import { isValidIpAddress } from '../utils/ipValidation'
 
 const props = withDefaults(
   defineProps<{
-    initial?: PublicIpRecord | null
+    initial?: Partial<PublicIpPayload> | null
     submitting?: boolean
     submitLabel?: string
     serverError?: string
@@ -71,15 +71,15 @@ watch(
   () => props.initial,
   (rec) => {
     if (rec) {
-      form.ip_address = rec.ip_address
-      form.provider = rec.provider
-      form.owner_type = rec.owner_type
-      form.application = rec.application
-      form.domain = rec.domain
-      form.environment = rec.environment
-      form.server_ip = rec.server_ip
-      form.status = rec.status
-      form.notes = rec.notes
+      form.ip_address = rec.ip_address ?? ''
+      form.provider = rec.provider ?? ''
+      form.owner_type = rec.owner_type ?? 'Internal'
+      form.application = rec.application ?? ''
+      form.domain = rec.domain ?? ''
+      form.environment = rec.environment ?? ''
+      form.server_ip = rec.server_ip ?? ''
+      form.status = rec.status ?? 'Used'
+      form.notes = rec.notes ?? ''
     } else {
       form.ip_address = ''
       form.provider = ''

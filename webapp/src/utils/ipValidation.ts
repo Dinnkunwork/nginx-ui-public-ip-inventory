@@ -10,6 +10,17 @@ export function isValidIpAddress(value: string): boolean {
   return IPV4_REGEX.test(trimmed) || IPV6_REGEX.test(trimmed)
 }
 
+export function suggestNextIpAddress(ip: string): string {
+  const parts = ip.trim().split('.')
+  if (parts.length === 4 && parts.every((p) => /^\d+$/.test(p))) {
+    const octets = parts.map(Number)
+    if (octets.every((n) => n >= 0 && n <= 255) && octets[3] < 254) {
+      return `${octets[0]}.${octets[1]}.${octets[2]}.${octets[3] + 1}`
+    }
+  }
+  return ''
+}
+
 export function statusTagColor(status: string): string {
   if (status === 'Used') return 'blue'
   if (status === 'Available') return 'green'

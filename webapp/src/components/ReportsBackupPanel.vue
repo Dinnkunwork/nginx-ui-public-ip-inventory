@@ -8,17 +8,22 @@ import {
   Popconfirm,
   Row,
   Select,
-  Spin,
   Table,
 } from 'antdv-next'
 import { onMounted, reactive, ref } from 'vue'
 import { inventoryApi } from '../api/client'
 import type { BackupEntry, DashboardSummary } from '../types/inventory'
 
-const loading = ref(false)
+defineProps<{
+  summary: DashboardSummary | null
+}>()
+
+const emit = defineEmits<{
+  (e: 'restored'): void
+}>()
+
 const error = ref('')
 const success = ref('')
-const summary = ref<DashboardSummary | null>(null)
 const backups = ref<BackupEntry[]>([])
 const backupBusy = ref(false)
 
@@ -62,20 +67,12 @@ const backupColumns = [
   { title: 'Action', key: 'action', width: 140 },
 ]
 
-async function loadReports(): Promise<void> {
-  loading.value = true
-  error.value = ''
+async function loadBackups(): Promise<void> {
   try {
-    const [sumRes, backupRes] = await Promise.all([
-      inventoryApi.getDashboardSummary(),
-      inventoryApi.listBackups(),
-    ])
-    summary.value = sumRes
-    backups.value = backupRes.items
+    const res = await inventoryApi.listBackups()
+    backups.value = res.items
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load reports'
-  } finally {
-    loading.value = false
+    error.value = err instanceof Error ? err.message : 'Failed to load backups'
   }
 }
 
@@ -107,7 +104,7 @@ async function triggerBackup(): Promise<void> {
   try {
     const created = await inventoryApi.createBackup()
     success.value = `Backup created: ${created.filename}`
-    await loadReports()
+    await loadBackups()
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to create backup'
   } finally {
@@ -122,7 +119,8 @@ async function restoreBackup(filename: string): Promise<void> {
   try {
     const res = await inventoryApi.restoreBackup(filename)
     success.value = `Restored from ${res.restored_from} (safety backup: ${res.safety_backup})`
-    await loadReports()
+    await loadBackups()
+    emit('restored')
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to restore backup'
   } finally {
@@ -130,13 +128,11 @@ async function restoreBackup(filename: string): Promise<void> {
   }
 }
 
-onMounted(loadReports)
+onMounted(loadBackups)
 </script>
 
 <template>
-  <div style="padding: 8px">
-    <h2 style="margin-bottom: 16px">Reports & Backup</h2>
-
+  <div>
     <Alert v-if="error" type="error" :title="error" show-icon style="margin-bottom: 16px" />
     <Alert v-if="success" type="success" :title="success" show-icon style="margin-bottom: 16px" />
 
@@ -169,33 +165,31 @@ onMounted(loadReports)
       </Row>
     </Card>
 
-    <Spin :spinning="loading">
-      <Row v-if="summary" :gutter="[16, 16]">
-        <Col :xs="24" :lg="12">
-          <Card title="Report by Provider">
-            <Table
-              size="small"
-              :pagination="false"
-              :data-source="summary.by_provider"
-              row-key="provider"
-              :columns="providerColumns"
-            />
-          </Card>
-        </Col>
+    <Row v-if="summary" :gutter="[16, 16]">
+      <Col :xs="24" :lg="12">
+        <Card title="Report by Provider">
+          <Table
+            size="small"
+            :pagination="false"
+            :data-source="summary.by_provider"
+            row-key="provider"
+            :columns="providerColumns"
+          />
+        </Card>
+      </Col>
 
-        <Col :xs="24" :lg="12">
-          <Card title="Report by Owner & Status">
-            <Table
-              size="small"
-              :pagination="false"
-              :data-source="summary.by_owner"
-              row-key="owner_type"
-              :columns="ownerColumns"
-            />
-          </Card>
-        </Col>
-      </Row>
-    </Spin>
+      <Col :xs="24" :lg="12">
+        <Card title="Report by Owner & Status">
+          <Table
+            size="small"
+            :pagination="false"
+            :data-source="summary.by_owner"
+            row-key="owner_type"
+            :columns="ownerColumns"
+          />
+        </Card>
+      </Col>
+    </Row>
 
     <Card title="SQLite Database Backups" style="margin-top: 16px">
       <template #extra>

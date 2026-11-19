@@ -15,9 +15,9 @@ import {
 import { computed, onMounted, reactive, ref } from 'vue'
 import { inventoryApi } from '../api/client'
 import IpDetailDrawer from '../components/IpDetailDrawer.vue'
-import IpFormModal from '../components/IpFormModal.vue'
+import IpFormModal, { type IpModalMode } from '../components/IpFormModal.vue'
 import type { PublicIpPayload, PublicIpRecord } from '../types/inventory'
-import { statusTagColor } from '../utils/ipValidation'
+import { statusTagColor, suggestNextIpAddress } from '../utils/ipValidation'
 
 const loading = ref(false)
 const error = ref('')
@@ -60,11 +60,14 @@ const columns = [
   { title: 'Domain', dataIndex: 'domain', key: 'domain' },
   { title: 'Environment', dataIndex: 'environment', key: 'environment' },
   { title: 'Status', dataIndex: 'status', key: 'status' },
-  { title: 'Actions', key: 'actions', width: 220 },
+  { title: 'Actions', key: 'actions', width: 280 },
 ]
 
 const modalOpen = ref(false)
-const editingRecord = ref<PublicIpRecord | null>(null)
+const modalMode = ref<IpModalMode>('create')
+const modalSourceIp = ref('')
+const editingId = ref<number | null>(null)
+const formInitial = ref<Partial<PublicIpPayload> | null>(null)
 const submitting = ref(false)
 const modalError = ref('')
 
@@ -96,13 +99,48 @@ async function loadIps(): Promise<void> {
 }
 
 function openCreate(): void {
-  editingRecord.value = null
+  modalMode.value = 'create'
+  modalSourceIp.value = ''
+  editingId.value = null
+  formInitial.value = null
   modalError.value = ''
   modalOpen.value = true
 }
 
 function openEdit(record: PublicIpRecord): void {
-  editingRecord.value = record
+  modalMode.value = 'edit'
+  modalSourceIp.value = record.ip_address
+  editingId.value = record.id
+  formInitial.value = {
+    ip_address: record.ip_address,
+    provider: record.provider,
+    owner_type: record.owner_type,
+    application: record.application,
+    domain: record.domain,
+    environment: record.environment,
+    server_ip: record.server_ip,
+    status: record.status,
+    notes: record.notes,
+  }
+  modalError.value = ''
+  modalOpen.value = true
+}
+
+function openClone(record: PublicIpRecord): void {
+  modalMode.value = 'clone'
+  modalSourceIp.value = record.ip_address
+  editingId.value = null
+  formInitial.value = {
+    ip_address: suggestNextIpAddress(record.ip_address),
+    provider: record.provider,
+    owner_type: record.owner_type,
+    application: record.application,
+    domain: record.domain,
+    environment: record.environment,
+    server_ip: record.server_ip,
+    status: record.status,
+    notes: record.notes,
+  }
   modalError.value = ''
   modalOpen.value = true
 }
@@ -123,8 +161,8 @@ async function handleSave(payload: PublicIpPayload): Promise<void> {
   submitting.value = true
   modalError.value = ''
   try {
-    if (editingRecord.value) {
-      await inventoryApi.updateIp(editingRecord.value.id, payload)
+    if (modalMode.value === 'edit' && editingId.value !== null) {
+      await inventoryApi.updateIp(editingId.value, payload)
     } else {
       await inventoryApi.createIp(payload)
     }
@@ -146,6 +184,29 @@ async function handleDelete(record: PublicIpRecord): Promise<void> {
   }
 }
 
+async function exportFilteredCsv(): Promise<void> {
+  error.value = ''
+  try {
+    const blob = await inventoryApi.exportCsvBlob({
+      q: filters.q,
+      provider: filters.provider || '',
+      owner_type: filters.owner_type || '',
+      environment: filters.environment || '',
+      status: filters.status || '',
+    })
+    const objectUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = objectUrl
+    link.download = 'public-ip-inventory.csv'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(objectUrl)
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to export CSV'
+  }
+}
+
 function resetFilters(): void {
   filters.q = ''
   filters.provider = undefined
@@ -163,7 +224,10 @@ onMounted(loadIps)
   <div style="padding: 8px">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
       <h2 style="margin: 0">IP Address List</h2>
-      <Button type="primary" @click="openCreate">Add Public IP</Button>
+      <Space>
+        <Button @click="exportFilteredCsv">Export CSV</Button>
+        <Button type="primary" @click="openCreate">Add Public IP</Button>
+      </Space>
     </div>
 
     <Card style="margin-bottom: 16px">
@@ -258,6 +322,7 @@ onMounted(loadIps)
           <Space>
             <Button size="small" @click="openDetails(record as PublicIpRecord)">View</Button>
             <Button size="small" @click="openEdit(record as PublicIpRecord)">Edit</Button>
+            <Button size="small" @click="openClone(record as PublicIpRecord)">Clone</Button>
             <Popconfirm
               :title="`Delete Public IP ${record.ip_address}?`"
               ok-text="Delete"
@@ -274,7 +339,9 @@ onMounted(loadIps)
 
     <IpFormModal
       v-model:open="modalOpen"
-      :initial="editingRecord"
+      :mode="modalMode"
+      :source-ip="modalSourceIp"
+      :initial="formInitial"
       :submitting="submitting"
       :server-error="modalError"
       @submit="handleSave"
