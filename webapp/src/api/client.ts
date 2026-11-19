@@ -11,7 +11,7 @@ export const PLUGIN_ID = 'com.company.public-ip-inventory'
 const BASE_PATH = `/api/plugins/${PLUGIN_ID}/http`
 
 export interface HttpClientLike {
-  get<T>(url: string, config?: { params?: Record<string, unknown> }): Promise<{ data: T }>
+  get<T>(url: string, config?: Record<string, unknown>): Promise<{ data: T }>
   post<T>(url: string, data?: unknown): Promise<{ data: T }>
   put<T>(url: string, data?: unknown): Promise<{ data: T }>
   delete<T>(url: string, config?: { params?: Record<string, unknown>; data?: unknown }): Promise<{ data: T }>
@@ -99,7 +99,7 @@ export const inventoryApi = {
   restoreBackup(filename: string): Promise<{ restored_from: string; safety_backup: string }> {
     return requestJson('POST', '/backups/restore', { filename, confirm: true })
   },
-  getExportCsvUrl(query: IpListQuery): string {
+  async exportCsvBlob(query: IpListQuery): Promise<Blob> {
     const params = new URLSearchParams()
     for (const [k, v] of Object.entries(query)) {
       if (v !== undefined && v !== null && String(v).trim() !== '') {
@@ -107,6 +107,15 @@ export const inventoryApi = {
       }
     }
     const qs = params.toString()
-    return `${BASE_PATH}/reports/export.csv${qs ? `?${qs}` : ''}`
+    const relative = `/reports/export.csv${qs ? `?${qs}` : ''}`
+    if (activeHttp) {
+      const res = await activeHttp.get<Blob>(relative, { responseType: 'blob' })
+      return res.data instanceof Blob ? res.data : new Blob([String(res.data)], { type: 'text/csv;charset=utf-8' })
+    }
+    const resp = await fetch(`${BASE_PATH}${relative}`, { credentials: 'include' })
+    if (!resp.ok) {
+      throw new Error(`CSV export failed (${resp.status})`)
+    }
+    return resp.blob()
   },
 }

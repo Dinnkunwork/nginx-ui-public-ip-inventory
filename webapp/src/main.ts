@@ -1,4 +1,4 @@
-import { defineNginxUIPlugin, registerPlugin } from '@nginxui/plugin-sdk'
+import { defineNginxUIPlugin, registerPlugin, useShared } from '@nginxui/plugin-sdk'
 import { PLUGIN_ID, setPluginHttpClient, type HttpClientLike } from './api/client'
 import AddIpView from './views/AddIpView.vue'
 import DashboardView from './views/DashboardView.vue'
@@ -13,65 +13,72 @@ registerPlugin(
         setPluginHttpClient(registry.http as unknown as HttpClientLike)
       }
 
+      const sharedIcons = (useShared().antdvIcons ?? {}) as Record<string, unknown>
+      const icon = sharedIcons.GlobalOutlined
+
       registry.registerRoute(
         {
           path: 'public-ip-inventory',
           name: 'PublicIpInventory',
           redirect: '/public-ip-inventory/dashboard',
-          translatedName: () => 'Public IP Inventory',
           meta: {
-            title: 'Public IP Inventory',
-            translatedName: () => 'Public IP Inventory',
-            icon: 'i-ant-design:global-outlined',
+            name: () => 'Public IP Inventory',
+            icon,
           },
-          children: [
-            {
-              path: 'dashboard',
-              name: 'PublicIpInventoryDashboard',
-              component: DashboardView,
-              translatedName: () => 'Dashboard',
-              meta: {
-                title: 'Dashboard',
-                translatedName: () => 'Dashboard',
-                icon: 'i-ant-design:dashboard-outlined',
-              },
-            },
-            {
-              path: 'list',
-              name: 'PublicIpInventoryList',
-              component: IpListView,
-              translatedName: () => 'IP Address List',
-              meta: {
-                title: 'IP Address List',
-                translatedName: () => 'IP Address List',
-                icon: 'i-ant-design:unordered-list-outlined',
-              },
-            },
-            {
-              path: 'add',
-              name: 'PublicIpInventoryAdd',
-              component: AddIpView,
-              translatedName: () => 'Add IP Address',
-              meta: {
-                title: 'Add IP Address',
-                translatedName: () => 'Add IP Address',
-                icon: 'i-ant-design:plus-circle-outlined',
-              },
-            },
-            {
-              path: 'reports',
-              name: 'PublicIpInventoryReports',
-              component: ReportsView,
-              translatedName: () => 'Reports',
-              meta: {
-                title: 'Reports',
-                translatedName: () => 'Reports',
-                icon: 'i-ant-design:file-excel-outlined',
-              },
-            },
-          ],
         },
         { order: 50 },
+      )
+
+      registry.registerRoute(
+        {
+          path: 'public-ip-inventory/dashboard',
+          name: 'PublicIpInventoryDashboard',
+          component: DashboardView,
+          meta: {
+            name: () => 'Dashboard',
+            lastRouteName: 'PublicIpInventory',
+          },
+        },
+        { parent: 'PublicIpInventory', order: 10 },
+      )
+
+      registry.registerRoute(
+        {
+          path: 'public-ip-inventory/list',
+          name: 'PublicIpInventoryList',
+          component: IpListView,
+          meta: {
+            name: () => 'IP Address List',
+            lastRouteName: 'PublicIpInventory',
+          },
+        },
+        { parent: 'PublicIpInventory', order: 20 },
+      )
+
+      registry.registerRoute(
+        {
+          path: 'public-ip-inventory/add',
+          name: 'PublicIpInventoryAdd',
+          component: AddIpView,
+          meta: {
+            name: () => 'Add IP Address',
+            lastRouteName: 'PublicIpInventory',
+          },
+        },
+        { parent: 'PublicIpInventory', order: 30 },
+      )
+
+      registry.registerRoute(
+        {
+          path: 'public-ip-inventory/reports',
+          name: 'PublicIpInventoryReports',
+          component: ReportsView,
+          meta: {
+            name: () => 'Reports',
+            lastRouteName: 'PublicIpInventory',
+          },
+        },
+        { parent: 'PublicIpInventory', order: 40 },
       )
     },
     teardown() {

@@ -33,9 +33,21 @@ async function loadReports(): Promise<void> {
   }
 }
 
-function downloadCsv(): void {
-  const url = inventoryApi.getExportCsvUrl(exportFilters)
-  window.open(url, '_blank', 'noopener,noreferrer')
+async function downloadCsv(): Promise<void> {
+  error.value = ''
+  try {
+    const blob = await inventoryApi.exportCsvBlob(exportFilters)
+    const objectUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = objectUrl
+    link.download = 'public-ip-inventory.csv'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(objectUrl)
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to export CSV'
+  }
 }
 
 async function triggerBackup(): Promise<void> {
